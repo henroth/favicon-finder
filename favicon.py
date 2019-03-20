@@ -1,3 +1,4 @@
+import database
 import requests
 
 from bs4 import BeautifulSoup
@@ -35,6 +36,25 @@ def get_favicon(url):
     favicon = compose_favicon(final_url, raw_favicon)
     return favicon
 
+class FaviconService(object):
+    def __init__(self, database):
+        self.database = database
+
+    def get_favicon_for_url(self, url, fresh=False):
+        if fresh:
+            return self._find_and_store(url)
+        favicon = self.database.find(url)
+        if favicon:
+            return favicon
+
+        return self._find_and_store(url)
+
+    def _find_and_store(self, url):
+        favicon = get_favicon(url)
+        # TODO handle favicon is None? or does the DB take care of that
+        self.database.insert(url, favicon)
+        return database.Favicon(url, favicon)
+        
 # These functions are mostly to facilitate the testing of parsing out the favicon link
 # without needing to keep downloading the pages
 def save_page(filename, page):

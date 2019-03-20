@@ -1,5 +1,6 @@
 import unittest
 import favicon
+import database
 
 class FaviconTests(unittest.TestCase):
     def test_compose_link_1(self):
@@ -55,6 +56,29 @@ class FaviconTests(unittest.TestCase):
 
         result = favicon.compose_favicon('http://example.com', 'https://example.com/favicon.ico')
         self.assertEqual(result, 'https://example.com/favicon.ico')
+
+    def test_database_find(self):
+        db = database.FaviconDatabase('test.db')
+        db.drop_table()
+        db.create_table()
+        db.insert_or_update('http://www.example.com', 'http://www.example.com/favicon.ico')
+
+        favicon = db.find('http://www.example.com')
+        self.assertIsNotNone(favicon)
+        self.assertEqual(favicon.url, 'http://www.example.com')
+        self.assertEqual(favicon.favicon, 'http://www.example.com/favicon.ico')
+
+        missing = db.find('http://www.otherexample.com')
+        self.assertIsNone(missing)
+
+        db.insert_or_update('http://www.example.com', 'http://www.example.com/favicon_new.ico')
+        favicon_new = db.find('http://www.example.com')
+        self.assertIsNotNone(favicon_new)
+        self.assertEqual(favicon_new.url, 'http://www.example.com')
+        self.assertEqual(favicon_new.favicon, 'http://www.example.com/favicon_new.ico')
+
+        db.close()
+
         
 if __name__ == "__main__":
     unittest.main()
