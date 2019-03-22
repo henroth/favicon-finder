@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Henry's Favicon Finder</title>
+  </head>
+  <body>
+    <h1>Henry's Favicon Finder</h1>
+
+    <form action="/" method="post">
+      <input type="text" id="user_query" name="user_query">
+      <button type="submit">Find Favicon</button>
+    </form>
+    {% if user_query %}
+    <div>
+      Website {{ user_query }}
+    </div>
+    {% if favicon_link %}
+    <div>
+      Favicon {{ favicon_link }}
+    </div>
+    <div>
+      <img src="{{favicon_link}}">
+    </div>
+    {% else %}
+    <div>
+      No Favicon Found
+    </div>
+    {% endif %}
+    {% endif %}
+    {% if error %}
+    <div>
+      {{ error }}
+    </div>
+    {% endif %}
+  </body>
+</html>
