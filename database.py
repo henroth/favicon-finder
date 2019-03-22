@@ -15,6 +15,8 @@ INSERT = "INSERT INTO favicons (url, favicon, created) VALUES (?, ?, ?)"
 UPDATE = "UPDATE favicons SET favicon = ? where url = ?"
 SELECT_BY_URL = "SELECT id, favicon, created FROM favicons WHERE url=?"
 
+COUNT = "SELECT COUNT(*) from favicons"
+
 class Favicon(object):
     def __init__(self, url, favicon):
         self.url = url
@@ -23,7 +25,7 @@ class Favicon(object):
 class FaviconDatabase(object):
     def __init__(self, name='favicon.db'):
         self.conn = sqlite3.connect(name)
-
+        
     def create_table(self):
         with self.conn as cursor:
             cursor.execute(CREATE_TABLE)
@@ -32,6 +34,10 @@ class FaviconDatabase(object):
     def drop_table(self):
         with self.conn as cursor:
             cursor.execute(DROP_TABLE)
+
+    def insert(self, url, favicon):
+        with self.conn as conn:
+            conn.execute(INSERT, (url, favicon, datetime.datetime.now()))
         
     def insert_or_update(self, url, favicon):
         with self.conn as cursor:
@@ -56,6 +62,10 @@ class FaviconDatabase(object):
             return Favicon(url, favicon)
         else:
             return None
+
+    def count(self):
+        with self.conn as conn:
+            return conn.execute(COUNT).fetchone()
     
     def close(self):
         self.conn.close()

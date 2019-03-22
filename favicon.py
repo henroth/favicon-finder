@@ -22,25 +22,30 @@ def compose_favicon(url, raw_favicon_link):
     return compose_link(url, raw_favicon_link)
 
 def get_favicon(url):
-    # TODO Will need to check status potentially if we want to
-    #      decide to retry them at a future point
-    final_url, status, page = download_page(url)
-    raw_favicon = find_favicon(page)
+    try:
+        # TODO Will need to check status potentially if we want to
+        #      decide to retry them at a future point
+        final_url, status, page = download_page(url)
+        raw_favicon = find_favicon(page)
 
-    # Some pages may not have a favicon
-    if not raw_favicon:
+        # Some pages may not have a favicon
+        if not raw_favicon:
+            return None
+
+        # If the page is redirected and the favicon is relative then it
+        # will be relative to the final url, not the original
+        favicon = compose_favicon(final_url, raw_favicon)
+        return favicon
+    except Exception as e:
+        # TODO log the error better
+        print("Failed getting %s: %s" % (url, e))
         return None
-
-    # If the page is redirected and the favicon is relative then it
-    # will be relative to the final url, not the original
-    favicon = compose_favicon(final_url, raw_favicon)
-    return favicon
 
 class FaviconService(object):
     def __init__(self, database):
         self.database = database
 
-    def get_favicon_for_url(self, url, fresh=False):
+    def get_favicon(self, url, fresh=False):
         if fresh:
             return self._find_and_store(url)
         favicon = self.database.find(url)
@@ -51,7 +56,8 @@ class FaviconService(object):
 
     def _find_and_store(self, url):
         favicon = get_favicon(url)
-        # TODO handle favicon is None? or does the DB take care of that
+        # TODO if the original url is redirect we may want to store both the orig
+        #      and the redirect as having this favicon
         self.database.insert(url, favicon)
         return database.Favicon(url, favicon)
         

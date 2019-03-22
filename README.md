@@ -6,4 +6,6 @@
     
 # About
 
-
+# TODO
+Investigate ConnectionErrors when populating the DB there seem to be more than I would expect
+Investigate favicon results having query parameters, am I constructing them wrong?
